@@ -1,0 +1,259 @@
+body {
+  background: #a0a0a0;
+  text-align: justify;
+}
+
+/***
+ *** misc settings
+ ***/
+pre, code, kbd, samp, .monospace {
+  font-family:monospace,monospace;
+}
+
+ol>li {
+  margin: 10px 0px;
+}
+p {
+  margin:2px 0px;
+}
+
+p + p {
+  margin:10px 0px;
+}
+
+/*
+p {
+  margin: 10px 0px !important;
+}
+li > p:only-child {
+  margin:0px 10px;
+}
+*/
+
+table {
+  border-collapse: collapse;
+  margin: 10px;
+}
+
+
+
+dl {
+  margin: 0;
+  padding: 1ex;
+}
+
+dt {
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+}
+
+dd {
+  margin: 0 0 1ex 2em;
+  padding: 0;
+}
+
+
+
+/***
+ *** Header section
+ ***/
+#header {
+  position: relative;
+  margin: 40px;
+  border: 1px solid;
+  border-radius: 10px;
+  top: 0;
+  left: 0;
+  background: #f7f7f7;
+  color: black;
+  text-align: center;
+}
+
+#header h1 {
+  padding: 5px ;
+  border: solid 2px;
+  display: inline-block;
+  width: auto;
+  margin: 20px 0;
+}
+
+#header h2 {
+  padding: 5px ;
+  text-align: center;
+}
+
+#header h3 {
+  padding: 5px ;
+  text-align: center;
+  font-weight: normal;
+}
+
+/***
+ *** table of content
+ ***/
+#toc {
+  margin: 40px;
+  padding: 10px;
+  border: 1px solid;
+  border-radius: 10px;
+  background: #f7f7f7;
+  color: black;
+}
+
+
+/***
+ *** body section
+ ***/
+#main {
+  margin: 40px;
+  padding: 20px;
+  border: 1px solid;
+  border-radius: 10px;
+  counter-reset: questioncount;
+  background: #f7f7f7;
+  color: black;
+}
+
+#main h1 {
+  margin-top: 20px ;
+  margin-bottom: 10px ;
+  padding-right: 10px ;
+  padding-left: 20px ;
+  border-bottom: solid 2px ;
+}
+
+#main h2 {
+  margin-top: 20px ;
+  margin-bottom: 10px ;
+  padding-left: 30px ;
+  width: auto;
+  border-bottom: solid 1px ;
+}
+
+#main h3 {
+  margin-top: 20px ;
+  margin-bottom: 10px ;
+  padding-left: 40px ;
+  width: auto;
+  text-decoration: underline;
+}
+
+#main dt {
+  font-weight: bold;
+}
+
+
+
+#main .question:before {
+  font-weight: bold;
+  content: "Question " counter(questioncount) ".";
+  counter-increment: questioncount;
+}
+#main .question , .bonus {
+  background: #eeeeee;
+  color: black ;
+  padding: 10px;
+  margin: 30px 20px;
+  border: 2px solid #aaaaaa ;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px #888888;
+}
+
+#main .bonus:before {
+  font-weight: bold;
+  content: "Question " counter(questioncount) " (BONUS).";
+  counter-increment: questioncount;
+}
+
+#main .remarque:before {
+  font-weight: bold;
+  content: "Remarque. ";
+}
+#main .remarque {
+  background: #ffeeee;
+  padding: 15px;
+  border: 1px solid red;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px #888888;
+  margin: 40px 90px;
+}
+
+#main .TODO:before {
+  font-weight: bold;
+  color: red;
+  content: "TODO. ";
+}
+#main .TODO {
+  background: #ff9999;
+  color: black;
+  padding: 5px;
+  border: 2px solid #ff0000 ;
+  border-radius: 10px;
+  margin-left: 60px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#main .TODO {
+  padding: 5px;
+  border: 2px solid #ff0000 ;
+  border-radius: 10px;
+  margin-left: 60px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#main .cadre {
+  padding: 15px;
+  border: 1px solid;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px #888888;
+  margin: 40px 90px;
+}
+/***
+ *** footer
+ ***/
+#footer {
+  width: 50%;
+  font-size: 75%;
+  text-align: center;
+  border: 1px solid;
+  border-radius: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  background: #f7f7f7;
+  color: black;
+}
+
+
+
+code {
+    background-color: lightgray;
+    padding: 0px 3px;
+    border-radius: 3px;
+}
+
+pre+code {
+    display: inline-block;
+    border-radius: 5px;
+    border: solid 1px;
+    margin-left: 2em;
+}
+
+pre code  {
+    display: inline-block;
+    border-radius: 5px;
+    border: solid 1px;
+    padding: 1em;
+}
+
+pre code.shell {
+    display: inline-block;
+    background-color: black;
+    color: white;
+    padding: 1em;
+}
