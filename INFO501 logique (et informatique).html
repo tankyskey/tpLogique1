@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <title>INFO501 : logique (et informatique)</title>
+  <link rel="stylesheet" type="text/css" href="INFO501%20logique%20(et%20informatique)_files/normalize.css">
+  <!-- <link rel="stylesheet" type="text/css" href="css/prism.css" /> -->
+  <link rel="stylesheet" type="text/css" href="INFO501%20logique%20(et%20informatique)_files/tp.css">
+  <link rel="stylesheet" type="text/css" href="INFO501%20logique%20(et%20informatique)_files/tp-local.css">
+  <!-- <script src="./js/prism.js"></script> -->
+  <!-- <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"> </script> -->
+</head>
+<body>
+
+<div id="header">
+  <h1>INFO501 : logique (et informatique)</h1>
+  <h2>TP 1 : satisfiabilité</h2>
+  <h3>Automne 2020</h3>
+</div>
+
+<div id="toc">
+<ul>
+  <li>
+    <p>
+    <a href="#toc_1">Consignes</a>
+    </p>
+  </li>
+  <li>
+    <p>
+    <a href="#toc_2">Liens utiles</a>
+    </p>
+  </li>
+  <li>
+    <p>
+    <a href="#toc_3">Préliminaires</a>
+    </p>
+    <ul>
+      <li>
+        <p>
+        <a href="#toc_4">Le format 'SAT' de D. Knuth pour les formules en
+        forme normale conjonctive</a>
+        </p>
+      </li>
+      <li>
+        <p>
+        <a href="#toc_5">Utilisation de <span class="monospace">naivesat</span></a>
+        </p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+    <a href="#toc_6">1. <span class="monospace">naivesat.py</span>, un
+    solveur récursif naïf en Python</a>
+    </p>
+    <ul>
+      <li>
+        <p>
+        <a href="#toc_7">1.1. Représentation des formules</a>
+        </p>
+      </li>
+      <li>
+        <p>
+        <a href="#toc_8">1.2. Code du solveur</a>
+        </p>
+      </li>
+      <li>
+        <p>
+        <a href="#toc_9">1.3. Petits exemples</a>
+        </p>
+      </li>
+      <li>
+        <p>
+        <a href="#toc_10">1.4. Rechercher <i>toutes</i> les solutions</a>
+        </p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+    <a href="#toc_11">2. Quelques problèmes de satisfiabilité</a>
+    </p>
+    <ul>
+      <li>
+        <p>
+        <a href="#toc_12">2.1. L'énigme de Einstein</a>
+        </p>
+        <ul>
+          <li>
+            <p>
+            <a href="#toc_13">échauffement</a>
+            </p>
+          </li>
+          <li>
+            <p>
+            <a href="#toc_14">Le problème de Einstein</a>
+            </p>
+            <ul>
+              <li>
+                <p>
+                <a href="#toc_15">Les variables</a>
+                </p>
+              </li>
+              <li>
+                <p>
+                <a href="#toc_16">Les indices</a>
+                </p>
+                <ul>
+                  <li>
+                    <p>
+                    <a href="#toc_17">Les contraintes</a>
+                    </p>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p>
+        <a href="#toc_18">2.2. Arithmétique</a>
+        </p>
+        <ul>
+          <li>
+            <p>
+            <a href="#toc_19">Inverser l'addition</a>
+            </p>
+          </li>
+          <li>
+            <p>
+            <a href="#toc_20">Inverser la multiplication</a>
+            </p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+    <a href="#toc_21">3. Optimisation du solveur naïf : algorithme DPLL</a>
+    </p>
+  </li>
+</ul>
+</div>
+
+<div id="main">
+
+
+<h1 id="toc_1"> Consignes </h1>
+
+<div class="cadre">
+<p>
+Le rendu de ce TP se fera uniquement par <a href="https://www.lama.univ-savoie.fr/TPLab/liste_TP/info-501/">TPLab</a> et
+consistera en <i>une archive</i> (<span class="monospace">zip</span>, <span class="monospace">tar</span>, etc.) <b>contenant un répertoire <span class="monospace">TP1-NOM</span></b> avec :
+</p>
+<ul>
+  <li>
+    <p>
+    votre fichier <span class="monospace">naivesat-NOM.py</span> modifié
+    </p>
+  </li>
+  <li>
+    <p>
+    vos fichier <span class="monospace">question2-NOM.sat</span>, <span class="monospace">cartes-NOM.sat</span> et <span class="monospace">xor3-NOM.sat</span>
+    </p>
+  </li>
+  <li>
+    <p>
+    vos fichiers <span class="monospace">addition-NOM.py</span> <span class="monospace">multiplication-NOM.py</span> et <span class="monospace">zebra-NOM.py</span>
+    </p>
+  </li>
+  <li>
+    <p>
+    un fichier <u>texte</u> <span class="monospace">README</span> contenant
+    les réponses aux questions du TP.
+    </p>
+  </li>
+</ul>
+<p>
+<b>Vous aurez compris que <span class="monospace">NOM</span> devra être
+remplacé par votre nom (ou vos noms en cas de binomes) !</b>
+</p>
+<p>
+<i>Tous vos fichiers doivent comporter une entête avec votre nom et votre
+groupe de TP.</i>
+</p>
+<div class="remarque">
+<p>
+Tout non respect d'une ou plusieurs de ces consignes entrainera
+automatiquement un retrait de points sur votre note !
+</p>
+</div>
+</div>
+
+<h1 id="toc_2">  Liens utiles  </h1>
+
+<ul>
+  <li>
+    <p>
+    <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/naivesat-NOM.py">le solveur <span class="monospace">naivesat-NOM.py</span> (Python)</a>, à compléter
+    </p>
+  </li>
+  <li>
+    <p>
+    <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/zebra-NOM.py">le générateur de clauses pour le problème de
+    Einstein (Python)</a>, à compléter
+    </p>
+  </li>
+  <li>
+    <p>
+    <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/addition-NOM.py">le générateur de clauses pour l'addition
+    en binaire (Python)</a>, à compléter
+    </p>
+  </li>
+  <li>
+    <p>
+    <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/multiplication-NOM.py">le générateur de clauses pour la
+    multiplication en binaire (Python)</a>, à compléter
+    </p>
+  </li>
+</ul>
+
+<h1 id="toc_3">  Préliminaires  </h1>
+
+<p>
+Cette première séance de travaux pratiques doit vous aidez à vous
+familiariser avec le problème de la <i>satisfiabilité</i> : SAT.
+</p>
+<p>
+Étant donnée une formule (données en forme normale conjonctive), comme
+<i>(x<sub>1</sub> ∨ ¬x<sub>2</sub> ∨ x<sub>3</sub>) ∧ (¬x<sub>1</sub> ∨
+¬x<sub>3</sub> ∨ x<sub>4</sub>) ∧ (x<sub>2</sub> ∨ ¬x<sub>4</sub>)</i> nous
+voulons savoir s'il est possible de <i>satisfaire</i> cette formule (càd la
+rendre <i>vraie</i>) en choisissant des valeurs booléennes pour
+<i>x<sub>1</sub></i>, <i>x<sub>2</sub></i>, <i>x<sub>3</sub></i> et
+<i>x<sub>4</sub></i>.
+</p>
+<p>
+Le problème de la satisfiabilité fera également l'objet du TP 2, où il faudra
+améliorer un solveur écrit en C...
+</p>
+
+<h2 id="toc_4">  Le format 'SAT' de D. Knuth pour les formules en forme normale conjonctive  </h2>
+
+<p>
+Les formules considérées seront toujours en forme normale conjonctive. Elle
+seront en général données dans des fichiers de type 'SAT' (extension <span class="monospace">.sat</span>).
+</p>
+<ul>
+  <li>
+    <p>
+    Chaque ligne qui commence par "<span class="monospace">~␣</span>" (<span class="monospace">␣</span> représente un espace) est ignorée : c'est un
+    commentaire.
+    </p>
+  </li>
+  <li>
+    <p>
+    Les lignes vides sont ignorées.
+    </p>
+  </li>
+  <li>
+    <p>
+    Chaque autre ligne contient une <i>clause</i>, donnée par la liste de ces
+    littéraux :
+    </p>
+    <ul>
+      <li>
+        <p>
+        un littéral négatif commence par le signe "<span class="monospace">~</span>", suivi d'une chaine représentant la
+        variable correspondante,
+        </p>
+      </li>
+      <li>
+        <p>
+        un littéral positif ne contient que la variable correspondante.
+        </p>
+      </li>
+    </ul>
+    <p>
+    Même si ce n'est pas obligatoire, il est prudent de limiter vos noms de
+    variables à des chaines ne contenant que des caractères ASCII
+    alphanumériques (avec <code>(),:;_@</code>).
+    </p>
+  </li>
+</ul>
+<p>
+Voici par exemple <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/test1.sat">la représentation de la
+formule</a> <i>(x<sub>1</sub> ∨ ¬x<sub>2</sub> ∨ x<sub>3</sub>) ∧
+(¬x<sub>1</sub> ∨ ¬x<sub>3</sub> ∨ x<sub>4</sub>) ∧ (x<sub>2</sub> ∨
+¬x<sub>4</sub>)</i> :
+</p>
+<pre><code>~ un exemple de formule toute simple dans un fichier SAT
+x1 ~x2 x3
+~x1 ~x3 x4
+x2 ~x4</code></pre>
+
+<h2 id="toc_5">  Utilisation de <span class="monospace">naivesat</span>  </h2>
+
+<p>
+Le fichier <span class="monospace">naivesat-NOM.py</span> contient un solveur
+SAT récursif naïf écrit en Python.
+</p>
+<p>
+Vous devrez le compléter (question 1) pour le rendre fonctionnel, mais voici
+comment il s'utilise pour chercher une solution
+</p>
+<pre><code class="shell">$ ./naivesat-NOM.py FICHIER_FORMULE</code></pre>
+<p>
+où <span class="monospace">FICHIER_FORMULE</span> est le fichier (au format
+SAT) qui contient la formule à considérer
+</p>
+<p>
+Par exemple :
+</p>
+<pre><code class="shell">$ ./naivesat-NOM.py test2.sat
+SATISFIABLE
+~a b c d
+$ ./naivesat-NOM.py test3.sat
+UNSATISFIABLE</code></pre>
+<p>
+Dans le premier cas, la formule est satisfiable avec les valeurs <span class="monospace">a=0</span>, <span class="monospace">b=c=d=1</span>, alors
+que dans le second cas, la formule n'est pas satisfiable.
+</p>
+<div class="remarque">
+<p>
+Deux autres fonctionnalités pratiques de <span class="monospace">naivesat-NOM.py</span> sont :
+</p>
+<ul>
+  <li>
+    <p>
+    Si vous donnez l'option <span class="monospace">-T</span> ou <span class="monospace">--test</span> à <span class="monospace">naivesate.py</span>, votre fonction <code>test</code>
+    sera appelée avec la formule et le reste des arguments de la ligne de
+    commande. C'est pratique ... pour faire quelques tests.
+    </p>
+  </li>
+  <li>
+    <p>
+    l'option <span class="monospace">--help</span> ou <span class="monospace">-h</span> vous affiche un petit message d'aide.
+    </p>
+  </li>
+</ul>
+</div>
+
+<h1 id="toc_6">1. <span class="monospace">naivesat.py</span>, un solveur récursif naïf en Python</h1>
+
+
+<h2 id="toc_7">1.1. Représentation des formules</h2>
+
+<p>
+En interne, les formules traitées par <span class="monospace">naivesat-NOM.py</span> sont des <i>listes de listes
+d'entiers (<u>non nuls</u>)</i>.
+</p>
+<ul>
+  <li>
+    <p>
+    Toutes les variables sont de la forme <i>x<sub>k</sub></i>
+    (<i>k&gt;0</i>) avec
+    </p>
+    <ul>
+      <li>
+        <p>
+        le littéral <i>x<sub>k</sub></i> représenté par l'entier <i>k</i>,
+        </p>
+      </li>
+      <li>
+        <p>
+        le littéral <i>¬x<sub>k</sub></i> représenté par l'entier <i>-k</i>.
+        </p>
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <p>
+        Chaque clause est représentée par la liste de ses littéraux. Par
+        exemple,
+        </p>
+      </li>
+    </ul>
+    <p>
+    <i>x<sub>3</sub> ∨ ¬x<sub>7</sub> ∨ x<sub>1</sub></i> sera représentée
+    par la liste <code>[3, -7, 1]</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+    la conjonction de toutes les clauses est représentée par la liste des
+    clauses. Par exemple, la formule
+    </p>
+    <div style="text-align: center">
+    (x<sub>1</sub> ∨ ¬x<sub>2</sub> ∨ x<sub>3</sub>) ∧ (¬x<sub>1</sub> ∨ ¬x<sub>3</sub> ∨ x<sub>4</sub>) ∧ (x<sub>2</sub> ∨ ¬x<sub>4</sub>)
+    </div>
+
+    <p>
+    est représentée par la liste
+    </p>
+<pre><code>[[1, -2, 3], [-1, -3, 4], [2, -4]]</code></pre>
+  </li>
+</ul>
+
+<h2 id="toc_8">1.2. Code du solveur</h2>
+
+<p>
+La première fonction définie dans <span class="monospace">naivesat-NOM.py</span> est la fonction <code>solve</code>.
+Cette fonction ne fait que quelques lignes et les commentaires devraient vous
+aidez à comprendre comment elle fonctionne.
+</p>
+<p>
+La deuxième fonction, utilisée par la fonction <code>solve</code> est
+<code>simplify_formula</code>. Cette fonction prend en argument une formule
+(càd une liste de listes d'entiers, voir plus haut) et un littéral (càd un
+entier non nul). Cette fonction doit simplifier la formule lorsqu'on suppose
+que le littéral fourni est vrai.
+</p>
+<p>
+Par exemple, si on suppose que le littéral <i>x<sub>2</sub></i> est vrai :
+</p>
+<div style="text-align:center">
+<table style="margin-left:auto;margin-right:auto">
+<tbody><tr>
+  <td style="text-align: left">
+  <i>avant simplification :</i>
+  </td>
+  <td style="text-align: left">
+  (x<sub>1</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: left">
+  ¬x<sub>2</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: left">
+  x<sub>3</sub>)
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  (¬x<sub>1</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: left">
+  ¬x<sub>3</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: left">
+  x<sub>4</sub>)
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  (x<sub>2</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: left">
+  ¬x<sub>4</sub>)
+  </td>
+</tr>
+<tr>
+  <td style="text-align: left">
+  <i>après simplification :</i>
+  </td>
+  <td style="text-align: left">
+  (x<sub>1</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: left">
+  x<sub>3</sub>)
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  (¬x<sub>1</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: left">
+  ¬x<sub>3</sub>
+  </td>
+  <td style="text-align: left">
+  ∨
+  </td>
+  <td style="text-align: left">
+  x<sub>4</sub>)
+  </td>
+  <td style="text-align: right">
+  
+  </td>
+</tr>
+</tbody></table>
+
+
+</div><p>
+En effet,
+</p>
+<ul>
+  <li>
+    <p>
+    <i>¬x<sub>2</sub></i> est faux, et on a <i>(x<sub>1</sub> ∨ <span class="monospace">FAUX</span> ∨ x<sub>3</sub>) = (x<sub>1</sub> ∨
+    x<sub>3</sub>)</i>
+    </p>
+  </li>
+  <li>
+    <p>
+    <i>x<sub>2</sub></i> est vrai, et comme <i>(<span class="monospace">VRAI</span> ∨ ¬x<sub>4</sub>) = <span class="monospace">VRAI</span></i>, on a <i>... ∧ ... ∧ (<span class="monospace">VRAI</span> ∨ ¬x<sub>4</sub>) = ... ∧ ... ∧ <span class="monospace">VRAI</span> = ... ∧ ...</i>.
+    </p>
+  </li>
+</ul>
+<div class="question">
+<p>
+La fonction <code>simplify_formula</code> doit <i>reconstruire</i> une liste
+de clauses à partir de la liste de clauses <code>F</code> :
+</p>
+<ul>
+  <li>
+    <p>
+    en omettant les clauses qui contiennent <code>lit</code>,
+    </p>
+  </li>
+  <li>
+    <p>
+    en remplaçant les clauses qui contiennent <code>-lit</code> par la même
+    clause, <i>sans <code>-lit</code></i>,
+    </p>
+  </li>
+  <li>
+    <p>
+    en laissant les autres clauses inchangées. -
+    </p>
+  </li>
+</ul>
+<div class="remarque">
+<p>
+<b>ATTENTION,</b> il ne faut pas <i>modifier</i> la formule ou les clauses,
+mais en recréer de nouvelles. C'est pour cela qu'on crée une nouvelle formule
+<code>simplified_F</code> et qu'il faudra recopier tous les littéraux de
+chaque clause pour en créer de nouvelles.
+</p>
+<p>
+<i>Vous ne devez par exemple pas utiliser la méthode
+<s><code>remove</code></s> des listes Python !</i>
+</p>
+<p>
+Je vous rappelle également que la <i>bonne</i> manière d'insérer un élément
+dans une liste est d'utiliser la méthode <code>append</code>. N'utilisez pas
+<s><code>L = L+[element]</code></s> !
+</p>
+</div>
+<ol>
+  <li>
+    <p>
+    Complétez le corps de la fonction <code>simplify_formula</code> et testez
+    la. Vous pouvez pour cela utiliser l'option <span class="monospace">-T</span> ou <span class="monospace">--test</span> pour
+    lancer la fonction de tests :
+    </p>
+<pre><code class="shell">$ ./naivesat-correction.py test.sat --test 1
+simplification avec 1
+avant : [[1, 2, -3], [2, 3, -4], [3, 4, 1], [4, -1, 2], [-1, -2, 3], [-2, -3, 4], [-3, -4, -1], [-4, 1, -2]]
+après : [[2, 3, -4], [4, 2], [-2, 3], [-2, -3, 4], [-3, -4]]</code></pre>
+    <p>
+    N'hésitez pas à modifier la fonction de tests.
+    </p>
+  </li>
+  <li>
+    <p>
+    Testez le solveur sur la <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/test1.sat">formule précédente</a>
+    <i>(x<sub>1</sub> ∨ ¬x<sub>2</sub> ∨ x<sub>3</sub>) ∧ (¬x<sub>1</sub> ∨
+    ¬x<sub>3</sub> ∨ x<sub>4</sub>) ∧ (x<sub>2</sub> ∨ ¬x<sub>4</sub>)</i>.
+    </p>
+    <p>
+    Le résultat est il bien correct ?
+    </p>
+  </li>
+</ol>
+</div>
+
+<h2 id="toc_9">1.3. Petits exemples</h2>
+
+<div class="question">
+<ol>
+  <li>
+    <p>
+    La formule <i>(a ∨ ¬b) ∧ (¬b ∨ ¬c) ∧ (¬a ∨ ¬c) ∧ (¬a ∨ ¬b ∨ c) ∧ (a ∨ b ∨
+    ¬c)</i> est elle satisfiable ?
+    </p>
+    <p>
+    Créez un fichier <span class="monospace">question2-NOM.sat</span> que
+    vous joindrez à votre archive pour tester.
+    </p>
+  </li>
+  <li>
+    <p>
+    Y'a t'il d'autres solution que celle trouvée ? Comment procédez vous pour
+    les trouver ? <span style="font-size: 4px">(Indice: il faudra rajouter des
+    clauses pour interdire la solution trouvée)</span>
+    </p>
+  </li>
+</ol>
+</div>
+
+<h2 id="toc_10">1.4. Rechercher <i>toutes</i> les solutions</h2>
+
+<div class="question">
+<p>
+Pour les <i>petites</i> formules, il est parfois intéressant de chercher
+<i>toutes</i> les solutions à un problème.
+</p>
+<ol>
+  <li>
+    <p>
+    En partant du code de la fonction <code>solve</code>, écrivez une
+    fonction <code>all_solutions</code> qui affiche toutes les solutions, au
+    fur et à mesure qu'elle les trouve.
+    </p>
+    <p>
+    Cette fonction aura exactement le même "squelette" que
+    <code>solve</code>, mais :
+    </p>
+    <ul>
+      <li>
+        <p>
+        elle ne renvoie pas de solution, elle les affiche avec la fonction
+        <code>print_sol</code>,
+        </p>
+      </li>
+      <li>
+        <p>
+        elle explore toujours les deux alternative "<code>+lit</code>" et
+        "<code>-lit</code>".
+        </p>
+      </li>
+    </ul>
+    <p>
+    Il ne sera donc plus possible d'utiliser le <code>or</code> du Python qui
+    ne calcule pas la seconde alternative...
+    </p>
+  </li>
+  <li>
+    <p>
+    Essayez (sans y passer trop de temps) de renvoyer le nombre de solutions
+    trouvées.
+    </p>
+  </li>
+</ol>
+</div>
+<div class="remarque">
+<p>
+Vous pouvez appeler la fonction <code>all_solutions</code> sur un fichier
+avec l'option <span class="monospace">-A</span> ou <span class="monospace">--all</span> de <span class="monospace">naivesat-NOM.py</span>.
+</p>
+</div>
+<div class="bonus">
+<p>
+Testez plusieurs fois <span class="monospace">naivesat-NOM.py</span> sur la
+<a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/test1.sat">formule précédente</a>) en mélangeant aléatoirement
+la formule (option <span class="monospace">-r</span> / <span class="monospace">--randomize</span> sur la ligne de commande).
+</p>
+<p>
+Que constatez vous ? Proposez une explication.
+</p>
+</div>
+
+<h1 id="toc_11">2. Quelques problèmes de satisfiabilité</h1>
+
+<p>
+Il est possible d'encoder de nombreux problèmes comme des problèmes de
+satisfiabilité. Par exemple, les règles d'un sudoku s'expriment comme des
+contraintes logiques :
+</p>
+<ul>
+  <li>
+    <p>
+    on dispose <i>9 × 9 × 9 = 729</i> variables : <i>x<sub>1,1,1</sub></i>
+    pour dire que "<i>la case (1,1) contient le chiffre 1</i>",
+    <i>x<sub>1,1,2</sub></i> pour dire que "<i>la case (1,1) contient le
+    chiffre 2</i>", ..., <i>x<sub>9,9,9</sub></i> pour dire que "<i>la case
+    (9,9) contient le chiffre 9</i>",
+    </p>
+  </li>
+  <li>
+    <p>
+    la contrainte "<i>chaque ligne contient au moins un 1</i>" s'exprime
+    comme <i>x<sub>1,1,1</sub> ∨ x<sub>2,1,1</sub> ∨ ... ∨
+    x<sub>9,1,1</sub></i>, etc.
+    </p>
+  </li>
+  <li>
+    <p>
+    on code également les contraintes <i>la ligne k contient au plus un
+    1</i>,
+    </p>
+  </li>
+  <li>
+    <p>
+    on fait pareil pour les diagonales et les "petits carrés",
+    </p>
+  </li>
+  <li>
+    <p>
+    sans oublier d'autres contraintes comme <i>chaque case contient
+    exactement 1 chiffre</i>,
+    </p>
+  </li>
+  <li>
+    <p>
+    ...
+    </p>
+  </li>
+</ul>
+<p>
+Bien sûr, il faut utiliser un programme pour générer une telle formule !
+</p>
+<div class="bonus">
+<p>
+Écrivez un programme qui génère un fichier SAT à partir d'une <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/sudoku-simple.txt">grille de sudoku</a>, et qui affiche la grille
+obtenu à partir de la solution trouvée par le solveur...
+</p>
+<p>
+<b>Attention,</b> ceci se rapproche plutôt d'un mini projet que d'une simple
+question. Ne commencer à y réfléchir qu'une fois que vous avez fait le reste
+du TP !
+</p>
+<p>
+<small>(Pour information, mon fichier Python qui permet de faire ceci fait un
+peu moins de 150 lignes.)</small>
+</p>
+</div>
+
+<h2 id="toc_12">2.1. L'énigme de Einstein</h2>
+
+<p>
+Comme <span class="monospace">naivesat-NOM.py</span> ne peut pas (encore)
+gérer un tel nombre de variables / clauses (voici <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/sudoku-simple.sat">un exemple de fichier SAT</a> correspondant à
+une grille de sudoku), nous allons regarder un autre problème "amusant" : une
+variante de l'<a href="https://fr.wikipedia.org/wiki/%C3%89nigme_d%27Einstein">énigme
+d'Einstein</a>.
+</p>
+
+<h3 id="toc_13">  échauffement  </h3>
+
+<p>
+Ce problème est extrait du lien suivant : <a href="http://villemin.gerard.free.fr/LogForm/Integram.htm">http://villemin.gerard.free.fr/LogForm/Integram.htm</a>.
+</p><div id="probleme_as">
+<p></p>
+<div class="FRAMED">
+<p>
+On suppose que les 4 cartes suivantes sont les 4 as :
+</p>
+<div style="text-align:center">
+<table style="margin-left:auto;margin-right:auto; border: solid 1px">
+<tbody><tr>
+  <td style="text-align: center; border: solid 1px">
+  1
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  2
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  3
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  4
+  </td>
+</tr>
+<tr>
+  <td style="text-align: center; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/card_back.png" alt="Images/card_back.png">
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/card_back.png" alt="Images/card_back.png">
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/card_back.png" alt="Images/card_back.png">
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/card_back.png" alt="Images/card_back.png">
+  </td>
+</tr>
+</tbody></table>
+
+
+</div><p>
+Et on dispose des indices suivants :
+</p>
+<ol>
+  <li>
+    <p>
+    En 2, il n'y a ni l'as de trèfle, ni l'as de pique.
+    </p>
+  </li>
+  <li>
+    <p>
+    L'as de trèfle est plus à droite que l'as de carreau.
+    </p>
+  </li>
+  <li>
+    <p>
+    L'as de carreau et l'as de cœur ne sont pas à côté l'un de l'autre.
+    </p>
+  </li>
+</ol>
+<p>
+<i>Question :</i> quelles sont les positions des as ? La solution est elle
+unique ?
+</p>
+</div>
+<p>
+</p></div>
+<p></p>
+<div class="question">
+<ol>
+  <li>
+    <p>
+    Écrivez (à la main) un fichier SAT pour résoudre le problème.
+    </p>
+    <ul>
+      <li>
+        <p>
+        il y aura 16 variables :
+        </p>
+        <ul>
+          <li>
+            <p>
+            <code>X_1_trefle</code> pour <i>l'as de trèfle est en position
+            1</i>
+            </p>
+          </li>
+          <li>
+            <p>
+            <code>X_2_trefle</code> pour <i>l'as de trèfle est en position
+            2</i>
+            </p>
+          </li>
+          <li>
+            <p>
+            ...
+            </p>
+          </li>
+          <li>
+            <p>
+            <code>X_3_coeur</code> pour <i>l'as de coeur est en position
+            3</i>
+            </p>
+          </li>
+          <li>
+            <p>
+            ...
+            </p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p>
+        le premier indice donne 2 clauses ne contenant qu'un littéral
+        </p>
+      </li>
+      <li>
+        <p>
+        le deuxième indice donne 4 clauses qu'il vous faudra transformer en
+        FNC (c'est facile) :
+        </p>
+        <ul>
+          <li>
+            <p>
+            <code>X_4_trefle ⟶ X_1_carreau ∨ X_2_carreau ∨ X_3_carreau</code>
+            </p>
+          </li>
+          <li>
+            <p>
+            <code>X_3_trefle ⟶ X_1_carreau ∨ X_2_carreau</code>
+            </p>
+          </li>
+          <li>
+            <p>
+            <code>X_2_trefle ⟶ X_1_carreau</code>
+            </p>
+          </li>
+          <li>
+            <p>
+            <code>¬X_1_trefle</code> (en effet, l'as de trèfle ne peut pas se
+            trouver en position 1)
+            </p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p>
+        le troisième indice donne 6 clauses de 2 littéraux chacune. Une de
+        ces clauses est <code>¬(X_2_carreau ∧ X_3_coeur)</code>. (Là encore,
+        la transformation en FNC est très facile...)
+        </p>
+      </li>
+    </ul>
+    <p>
+    Il vous faudra aussi ajouter d'autres contraintes. La plus complexe sera
+    pour dire, par exemple, qu'il n'y a qu'un seul as de pique. Les clauses
+    correspondantes, au format SAT, sont :
+    </p>
+<pre><code>~  il y a au plus un as de pique
+~X_1_pique ~X_2_pique
+~X_1_pique ~X_3_pique
+~X_1_pique ~X_4_pique
+~X_2_pique ~X_3_pique
+~X_2_pique ~X_4_pique
+~X_3_pique ~X_4_pique</code></pre>
+    <p>
+    Avec une utilisation judicieuse du copier/coller, l'écriture de ce
+    fichier ne devrait pas vous prendre trop de temps... Je vous conseille
+    également de mettre des commentaires pour expliquer à quoi correspond
+    chaque groupe de clauses.
+    </p>
+  </li>
+  <li>
+    <p>
+    Cherchez une solution au problème avec <span class="monospace">naivesat-NOM.py</span>, et vérifiez qu'elle est bien
+    cohérente avec les indices.
+    </p>
+    <p>
+    <i>Documentez (dans le fichier <span class="monospace">README</span>) et
+    corrigez les bugs éventuels que vous trouvez.</i>
+    </p>
+  </li>
+</ol>
+</div>
+
+<h3 id="toc_14">  Le problème de Einstein  </h3>
+
+<p>
+Voici maintenant une variante de l'<a href="https://fr.wikipedia.org/wiki/%C3%89nigme_d%27Einstein">énigme
+d'Einstein</a>.
+</p>
+<p>
+</p><div id="probleme_einstein">
+<p></p>
+<div class="cadre">
+<p>
+On suppose que 5 maisons sont alignée, en positions 1, 2, 3, 4, 5:
+</p>
+<div style="text-align:center">
+<table style="margin-left:auto;margin-right:auto; border: solid 1px">
+<tbody><tr>
+  <td style="text-align: center; border: solid 1px">
+  1
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  2
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  3
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  4
+  </td>
+  <td style="text-align: center; border: solid 1px">
+  5
+  </td>
+</tr>
+<tr>
+  <td style="text-align: right; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/small_house-1.png" alt="./Images/small_house-1.png">
+  </td>
+  <td style="text-align: right; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/small_house-2.png" alt="./Images/small_house-2.png">
+  </td>
+  <td style="text-align: right; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/small_house-3.png" alt="./Images/small_house-3.png">
+  </td>
+  <td style="text-align: right; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/small_house-4.png" alt="./Images/small_house-4.png">
+  </td>
+  <td style="text-align: right; border: solid 1px">
+  <img src="INFO501%20logique%20(et%20informatique)_files/small_house-5.png" alt="./Images/small_house-5.png">
+  </td>
+</tr>
+</tbody></table>
+
+
+</div><p>
+Chaque maison est habitée par une personne :
+</p>
+<ul>
+  <li>
+    <p>
+    qui a un animal
+    </p>
+  </li>
+  <li>
+    <p>
+    qui boit une boisson particulière
+    </p>
+  </li>
+  <li>
+    <p>
+    qui écoute un style de musique
+    </p>
+  </li>
+  <li>
+    <p>
+    qui exerce un métier
+    </p>
+  </li>
+</ul>
+<p>
+On sait que
+</p>
+<ol>
+  <li>
+    <p>
+    Le musicien a une tortue.
+    </p>
+  </li>
+  <li>
+    <p>
+    Le propriétaire de la maison jaune écoute du jazz.
+    </p>
+  </li>
+  <li>
+    <p>
+    La personne qui écoute du hard-rock a un chat.
+    </p>
+  </li>
+  <li>
+    <p>
+    La maison en bois se trouve juste à gauche de la maison blanche.
+    </p>
+  </li>
+  <li>
+    <p>
+    Le chercheur habite dans la maison en briques.
+    </p>
+  </li>
+  <li>
+    <p>
+    Le footballeur habite juste à coté de l'immeuble.
+    </p>
+  </li>
+  <li>
+    <p>
+    La personne qui écoute de la musique classique est voisine de celle qui
+    boit de la bière.
+    </p>
+  </li>
+  <li>
+    <p>
+    La personne qui écoute du hiphop boit du thé.
+    </p>
+  </li>
+  <li>
+    <p>
+    La personne qui habite dans la maison du milieu boit beaucoup de soda.
+    </p>
+  </li>
+  <li>
+    <p>
+    Le footballeur habite dans la première maison.
+    </p>
+  </li>
+  <li>
+    <p>
+    La personne qui écoute de la musique classique est voisine de la personne
+    qui a des poissons.
+    </p>
+  </li>
+  <li>
+    <p>
+    Le boulanger écoute de la chanson française.
+    </p>
+  </li>
+  <li>
+    <p>
+    La personne qui a un hamster est voisine de celle qui écoute du jazz.
+    </p>
+  </li>
+  <li>
+    <p>
+    L'architecte boit de l'eau.
+    </p>
+  </li>
+  <li>
+    <p>
+    Le propriétaire de la maison en bois aime bien le whisky.
+    </p>
+  </li>
+</ol>
+<p>
+<i>Question :</i> qui est le propriétaire du zèbre ?
+</p>
+</div>
+<p>
+</p></div>
+<p></p>
+<p>
+L'expression de ce problème comme problème de satisfiabilité utilisera 125
+variables ! Il est donc préférable de générer la formule par un programme.
+</p>
+
+<h4 id="toc_15">  Les variables  </h4>
+
+<p>
+Les variables seront toutes de la forme <code>E_i_a</code> pour dire
+"<i>l'attribut <span class="monospace">a</span> est à l'</i><span class="monospace">E</span><i>mplacement <span class="monospace">i</span></i>"
+</p>
+<p>
+Les attributs sont les types de maisons (5 possibilités), animaux (5
+possibilités), boissons (5 possibilités), styles de musique (5 possibilité),
+métiers (5 possibilités). Il y a donc 25 attributs et 5 emplacements
+possibles. Cela fait bien un total de <i>25 × 5 = 125</i> variables.
+</p>
+<p>
+Par exemple, la formule <span class="monospace">E_3_musicien ∧
+E_3_brique</span> indique que le musicien habite dans la maison en briques, et
+que cette maison est en position 3.
+</p>
+
+<h4 id="toc_16">  Les indices  </h4>
+
+<p>
+La plupart des indices sont de la forme "<i>les attributs <span class="monospace">a</span> et <span class="monospace">b</span> sont au même
+endroit</i>". Par exemple, le premier indice est équivalent à "<i>le musicien
+et la tortue sont au même endroit</i>".
+</p>
+<p>
+On peut exprimer ceci par la formule
+</p>
+<div style="text-align:center">
+<table style="margin-left:auto;margin-right:auto">
+<tbody><tr>
+  <td style="text-align: center">
+  <span class="monospace">(E_1_musicien ⟶ E_1_tortue)</span>
+  </td>
+  <td style="text-align: right">
+  <span class="monospace">∧</span>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: center">
+  <span class="monospace">(E_2_musicien ⟶ E_2_tortue)</span>
+  </td>
+  <td style="text-align: right">
+  <span class="monospace">∧</span>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: center">
+  <span class="monospace">(E_3_musicien ⟶ E_3_tortue)</span>
+  </td>
+  <td style="text-align: right">
+  <span class="monospace">∧</span>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: center">
+  <span class="monospace">(E_4_musicien ⟶ E_4_tortue)</span>
+  </td>
+  <td style="text-align: right">
+  <span class="monospace">∧</span>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: right">
+  <span class="monospace">(E_5_musicien ⟶ E_5_tortue)</span>
+  </td>
+</tr>
+</tbody></table>
+
+
+</div><p>
+qu'il vous faudra transformer en FNC (5 clauses de 2 littéraux).
+</p>
+<p>
+Nous allons utiliser 4 types d'indices :
+</p>
+<ul>
+  <li>
+    <p>
+    "<i>les attributs <span class="monospace">a</span> et <span class="monospace">b</span> sont au même endroit</i>", généré par l'appel à
+    la fonction Python <code>implies(a, b)</code> ;
+    </p>
+  </li>
+  <li>
+    <p>
+    "<i>l'attribut <span class="monospace">a</span> se trouve juste à gauche
+    de l'attribut <span class="monospace">b</span></i>", généré par la
+    fonction <code>left_of(a, b)</code> ;
+    </p>
+  </li>
+  <li>
+    <p>
+    "<i>l'attribut <span class="monospace">a</span> est voisin de l'attribut
+    <span class="monospace">b</span></i>", généré par la fonction
+    <code>next_to(a, b)</code> ;
+    </p>
+  </li>
+  <li>
+    <p>
+    "<i>l'attribut <span class="monospace">a</span> est à l'emplacement <span class="monospace">i</span></i>", généré par la fonction <code>exact(i,
+    a)</code>.
+    </p>
+  </li>
+</ul>
+<p>
+Les fonctions <code>left_of</code>, <code>next_to</code> et
+<code>exact</code> sont déjà définies dans le fichier <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/zebra-NOM.py"><span class="monospace">zebra-NOM.py</span></a>.
+</p>
+
+<h5 id="toc_17">  Les contraintes  </h5>
+
+<p>
+Il faut à ceci ajouter 3 autres contraintes logiques :
+</p>
+<ul>
+  <li>
+    <p>
+    "<i>tous les attributs sont à un emplacement</i>" :
+    </p>
+<div style="text-align:center">
+    <table style="margin-left:auto;margin-right:auto">
+    <tbody><tr>
+      <td style="text-align: center">
+      <span class="monospace">(E_1_jazz ∨ E_2_jazz ∨ E_3_jazz ∨ E_4_jazz ∨ E_5_jazz)</span>
+      </td>
+      <td style="text-align: right">
+      ∧
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+      <span class="monospace">(E_1_whisky ∨ E_2_whisky ∨ E_3_whisky ∨ E_4_whisky ∨ E_5_whisky)</span>
+      </td>
+      <td style="text-align: right">
+      ∧
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+      ............. etc. .............
+      </td>
+    </tr>
+    </tbody></table>
+
+
+</div>    <p>
+    générée par la fonction <code>constraints_1()</code>
+    </p>
+  </li>
+  <li>
+    <p>
+    "<i>aucun attribut n'est à 2 emplacements différents</i>" générée par la
+    fonction <code>constraints_2()</code>
+    </p>
+  </li>
+  <li>
+    <p>
+    "<i>il n'y a pas 2 attributs d'une même catégorie au même
+    emplacement</i>" générée par la fonction <code>constraints_3()</code>
+    </p>
+  </li>
+</ul>
+<p>
+Les fonctions <code>constraints_2</code> et <code>constraints_3</code> sont
+déjà définies dans le fichier <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/zebra-NOM.py"><span class="monospace">zebra-NOM.py</span></a>.
+</p>
+<div class="question">
+<ol>
+  <li>
+    <p>
+    Récupérez le fichier <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/zebra-NOM.py"><span class="monospace">zebra-NOM.py</span></a> et
+    </p>
+    <ul>
+      <li>
+        <p>
+        écrivez le corps de la fonction <code>implies</code>,
+        </p>
+      </li>
+      <li>
+        <p>
+        écrivez le corps de la fonction <code>constraints_1</code>,
+        </p>
+      </li>
+      <li>
+        <p>
+        complétez avec les appels pertinents pour chacun des indices.
+        </p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>
+    lancez <span class="monospace">naivesat-NOM.py</span> sur la formule
+    obtenue.
+    </p>
+  </li>
+  <li>
+    <p>
+    Répondez à la question "<i>Qui est le propriétaire du zèbre ?</i>".
+    </p>
+</li></ol></div>
+<div class="remarque">
+  
+
+<p>
+L'ordre des clauses d'une formule est parfois important.
+</p>
+<p>
+Essayer de résoudre le problème en mélangeant la formule (option <span class="monospace">-r</span> / <span class="monospace">--random</span>), ou
+simplement en mettant les contraintes logiques (appels aux fonctions
+<code>constraints_1</code>, <code>constraints_2</code> et
+<code>constraints_3</code>) avant les indices pour constater une grosse
+différence de temps de calcul !
+</p>
+</div>
+<div class="bonus">
+<p>
+Normalement, il n'y a qu'une seule solution au problème ! Si vous lancez
+<span class="monospace">naivesat-NOM.py</span> avec l'option <span class="monospace">-A</span> / <span class="monospace">--all</span>, vous
+devriez obtenir 2 solutions. (Le propriétaire du zèbre est le même dans les
+deux...)
+</p>
+<p>
+Essayez de comparer les solutions afin de trouver le bug que j'ai introduit
+dans le fichier <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/zebra-NOM.py"><span class="monospace">zebra-NOM.py</span></a>.
+</p>
+</div>
+
+<h2 id="toc_18">2.2. Arithmétique</h2>
+
+<p>
+Étant donné un circuit booléen, il est facile de calculer la sortie à partir
+des entrées. Avec un solveur, on peut essayer de faire l'inverse : étant donné
+le résultat, trouver une entrée correspondante !
+</p>
+<p>
+Les entiers d'un ordinateur sont simplement des suites de (32 ou 64) bits.
+Les opérations sont faites par des circuits, c'est à dire des opérations
+logiques sur ces bits. Nous allons essayer d'inverser les circuits
+correspondants à des opérations arithmétique.
+</p>
+
+<h3 id="toc_19">  Inverser l'addition  </h3>
+
+<p>
+Par exemple, l'addition de 2 nombres écrits en binaire se fait en
+additionnant leurs bits <i>avec la retenue</i> colonne par colonne.
+</p>
+<p>
+Pour additionner les nombres <i>a<sub>k</sub> ... a<sub>1</sub>
+a<sub>0</sub></i> et <i>b<sub>k</sub> ... b<sub>1</sub> b<sub>0</sub></i>, on
+peut "poser l'addition"
+</p>
+<div style="text-align:center">
+<table style="margin-left:auto;margin-right:auto">
+<tbody><tr>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  c<sub>n</sub>
+  </td>
+  <td style="text-align: center">
+  ..........
+  </td>
+  <td style="text-align: center">
+  c<sub>2</sub>
+  </td>
+  <td style="text-align: center">
+  c<sub>1</sub>
+  </td>
+  <td style="text-align: center">
+  c<sub>0</sub>
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: left">
+  <small>(retenues)</small>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  a<sub>n</sub>
+  </td>
+  <td style="text-align: center">
+  ..........
+  </td>
+  <td style="text-align: center">
+  a<sub>2</sub>
+  </td>
+  <td style="text-align: center">
+  a<sub>1</sub>
+  </td>
+  <td style="text-align: center">
+  a<sub>0</sub>
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: left">
+  <small>(1er nombre)</small>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: left">
+  +
+  </td>
+  <td style="text-align: center">
+  b<sub>n</sub>
+  </td>
+  <td style="text-align: center">
+  ..........
+  </td>
+  <td style="text-align: center">
+  b<sub>2</sub>
+  </td>
+  <td style="text-align: center">
+  b<sub>1</sub>
+  </td>
+  <td style="text-align: center">
+  b<sub>0</sub>
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: left">
+  <small>(2ème nombre)</small>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: right" colspan="7">
+  <hr>
+  </td>
+</tr>
+<tr>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  s<sub>n</sub>
+  </td>
+  <td style="text-align: center">
+  ..........
+  </td>
+  <td style="text-align: center">
+  s<sub>2</sub>
+  </td>
+  <td style="text-align: center">
+  s<sub>1</sub>
+  </td>
+  <td style="text-align: center">
+  s<sub>0</sub>
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: center">
+  
+  </td>
+  <td style="text-align: left">
+  <small>(résultat)</small>
+  </td>
+</tr>
+</tbody></table>
+
+
+</div><ul>
+  <li>
+    <p>
+    le bit du résultat <i>s<sub>k</sub></i> est égal à <i>a<sub>k</sub> ⊕
+    b<sub>k</sub> ⊕ c<sub>k</sub></i> (addition sans retenue)
+    </p>
+  </li>
+  <li>
+    <p>
+    le bit de retenue <i>c<sub>k+1</sub></i> est égal à <i>(a<sub>k</sub> ∧
+    b<sub>k</sub>) ∨ (a<sub>k</sub> ∧ c<sub>k</sub>) ∨ (b<sub>k</sub> ∧
+    c<sub>k</sub>)</i>
+    </p>
+  </li>
+</ul>
+<p>
+Un des exercice de la première feuille de TD consistait à calculer les formes
+normales conjonctives des formules <i>s ⇔ (a ⊕ b ⊕ c)</i> et <i>cc ⇔ (a ∧ b) ∨
+(a ∧ c) ∨ (b ∧ c)</i>. On avait trouvé respectivement
+</p>
+<div style="text-align:center">
+<table style="margin-left:auto;margin-right:auto">
+<tbody><tr>
+  <td style="text-align: left">
+  <i>(¬a ∨ ¬b ∨ ¬c ∨ s)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(¬a ∨ ¬b ∨ c ∨ ¬s)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(¬a ∨ b ∨ ¬c ∨ ¬s)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(a ∨ ¬b ∨ ¬c ∨ ¬s)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+</tr>
+<tr>
+  <td style="text-align: left">
+  <i>(a ∨ b ∨ c ∨ ¬s)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(a ∨ b ∨ ¬c ∨ s)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(a ∨ ¬b ∨ c ∨ s)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(¬a ∨ b ∨ c ∨ s)</i>
+  </td>
+</tr>
+</tbody></table>
+
+
+</div><p>
+et
+</p>
+<div style="text-align:center">
+<table style="margin-left:auto;margin-right:auto">
+<tbody><tr>
+  <td style="text-align: left">
+  <i>(¬a ∨ ¬b ∨ ¬c ∨ cc)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(¬a ∨ ¬b ∨ c ∨ cc)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(¬a ∨ b ∨ ¬c ∨ cc)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(a ∨ ¬b ∨ ¬c ∨ cc)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+</tr>
+<tr>
+  <td style="text-align: left">
+  <i>(a ∨ b ∨ c ∨ ¬cc)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(a ∨ b ∨ ¬c ∨ ¬cc)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(a ∨ ¬b ∨ c ∨ ¬cc)</i>
+  </td>
+  <td style="text-align: left">
+  ∧
+  </td>
+  <td style="text-align: left">
+  <i>(¬a ∨ b ∨ c ∨ ¬cc)</i>
+  </td>
+</tr>
+</tbody></table>
+
+
+</div><div class="question">
+<p>
+Créez un fichier <span class="monospace">xor3-NOM.sat</span> approprié, et en
+utilisant votre fonction <code>all_solutions</code>, vérifiez que les
+solutions sont effectivement les valeurs de <i>a</i>, <i>b</i>, <i>c</i> et
+<i>s</i> qui vérifient la formule <i>s ⇔ (a ⊕ b ⊕ c)</i>.
+</p>
+</div>
+<div class="question">
+<p>
+Téléchargez le fichier <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/addition-NOM.py"><span class="monospace">addition-NOM.py</span></a>.
+</p>
+<p>
+Écrivez une fonction <code>xor3(s, a, b, c)</code> qui affiche les clauses
+correspondant à l'opération (sur des bits) <span class="monospace">s := a ⊕ b
+⊕ c</span>.
+</p>
+<p>
+Inspirez-vous pour cela de la fonction <code>carry3(cc, a, b, c)</code> qui
+affiche les clauses correspondant à l'opération <span class="monospace">cc :=
+(a ∧ b) ∨ (a ∧ c) ∨ (b ∧ c)</span>.
+</p>
+</div>
+<div class="question">
+<ol>
+  <li>
+    <p>
+    Complétez le fichier <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/addition-NOM.py"><span class="monospace">addition-NOM.py</span></a> pour générer un problème SAT
+    correspondant au circuit addition de résultat <i>s</i> :
+    </p>
+    <ul>
+      <li>
+        <p>
+        générer toutes les clauses (<i>i=0, ..., n</i>) pour <i>s<sub>k</sub>
+        := a<sub>k</sub> ⊕ b<sub>k</sub> ⊕ c<sub>k</sub></i> et
+        <i>c<sub>k+1</sub> := (a<sub>k</sub> ∧ b<sub>k</sub>) ∨ (a<sub>k</sub>
+        ∧ c<sub>k</sub>) ∨ (b<sub>k</sub> ∧ c<sub>k</sub>)</i>
+        </p>
+      </li>
+      <li>
+        <p>
+        imposer les valeurs de <i>s<sub>0</sub></i>, <i>s<sub>1</sub></i>,
+        ... pour obtenir le résultat <i>s</i>.
+        </p>
+      </li>
+    </ul>
+<div class="remarque">
+    <ul>
+      <li>
+        <p>
+        <i>s<sub>0</sub></i> correspond à la parité de <i>s</i>,
+        </p>
+      </li>
+      <li>
+        <p>
+        <i>s<sub>1</sub></i> correspond à la parité de <i>s // 2</i>,
+        </p>
+      </li>
+      <li>
+        <p>
+        <i>s<sub>2</sub></i> correspond à la parité de <i>s // 4</i>,
+        </p>
+      </li>
+      <li>
+        <p>
+        <i>s<sub>3</sub></i> correspond à la parité de <i>s // 8</i>,
+        </p>
+      </li>
+      <li>
+        <p>
+        etc.
+        </p>
+      </li>
+    </ul>
+</div>
+  </li>
+  <li>
+    <p>
+    Vérifiez que vous obtenez une solutions correcte pour l'addition <i>a + b
+    == 7</i>, sur 4 bits.
+    </p>
+    <p>
+    <i>Documentez (dans le fichier <span class="monospace">README</span>) et
+    corrigez les bugs éventuels que vous trouvez.</i>
+    </p>
+    <p>
+    Pour ceci, vous pouvez lancer le programme avec 2 arguments : la valeur
+    de <i>n</i> (nombre de bits) et la valeurs de <i>s</i> (somme voulue).
+    </p>
+<pre><code class="shell">$ ./addition-NOM.py 4 7 &gt; mult.sat</code></pre>
+    <p>
+    permettra de générer les clauses correspondantes dans le fichier <span class="monospace">mult.sat</span>.
+    </p>
+  </li>
+</ol>
+<div class="remarque">
+<p>
+Si on ne donne pas de nom de fichier pour la formule, <span class="monospace">naivesat-NOM.py</span> la lit sur l'entrée standard. Il est
+donc possible d'utiliser les <i>redirections</i> des shells Unix pour éviter
+d'avoir à sauvegarder un fichier à chaque fois
+</p>
+<pre><code class="shell">$ ./addition-NOM.py 4 7 | ./naivesat-NOM.py -v
+&gt;&gt;&gt; the formula contains 17 clauses and 70 variables, for a total of 262 literals
+SATISFIABLE
+~r1 ~r5 s1 s2 s3 ~s4 a1 ~b1 ~r2 a2 ~b2 ~r3 a3 ~b3 ~r4 ~a4 ~b4</code></pre>
+</div>
+</div>
+<div class="question">
+<p>
+Testez (sur des petites valeurs) en utilisant la fonction
+<code>all_solutions</code> pour vérifiez que vous trouvez bien le bon nombre
+de solutions pour <i>a + b == s</i>. (Il y a exactement <i>s+1</i> manières
+d'obtenir <i>s</i> comme la somme de 2 nombres : <i>0+s</i>, <i>1+(s-1)</i>,
+<i>2+(s-2)</i>, ..., <i>s + 0</i>.)
+</p>
+<p>
+<i>Documentez (dans le fichier <span class="monospace">README</span>) et
+corrigez les bugs éventuels que vous trouvez.</i>
+</p>
+</div>
+
+<h3 id="toc_20">  Inverser la multiplication  </h3>
+
+<p>
+Inverser un circuit additionneur n'est pas très intéressant. Par contre,
+inverser un circuit <i>multiplicateur</i> l'est plus. Vérifier la
+satisfiabilité correspondant à <i>a × b = p</i> (pour un <i>p</i> donné)
+revient à chercher des facteurs de <i>p</i>, càd à factoriser <i>p</i> !
+</p>
+<p>
+Générer les clauses correspondant à une multiplication est un peu plus
+complexe que pour l'addition. Le fichier <a href="https://www.lama.univ-savoie.fr/pagesmembres/hyvernat/Enseignement/2021/info501/TP1/multiplication-NOM.py"><span class="monospace">multiplication-NOM.py</span></a> le fera pour vous.
+</p>
+<div class="question">
+<ol>
+  <li>
+    <p>
+    Ajoutez, <i>tout à la fin du fichier</i>, les clauses pertinentes pour
+    forcer les valeurs de <i>p<sub>0</sub></i>, <i>p<sub>1</sub></i>, ...
+    <i>p_<sub>n</sub></i> aux bits de <i>p</i>. (C'est identique à ce que vous
+    avez fait pour forcer )
+    </p>
+    <p>
+    Vérifiez que vous arrivez bien à factoriser le nombre 48 en 2 nombres de
+    4 bits :
+    </p>
+<pre><code class="shell">$ ./ multiplication.py 4 4 48 | ./naivesat-NOM.py -r
+SATISFIABLE
+x_17 ~x_13 ~x_15 ~a_2 ~q_2_2 p_5 ~p_6 ~q_2_1 ~q_1_2 ~x_8 ~q_1_0 ~x_1 ~x_9 ~q_3_0 ~x_6 ~q_2_0 ~q_2_3 b_1 ~q_1_1 ~a_1 x_12 ~q_0_2 a_3 ~x_10 ~x_4 ~b_0 ~q_0_0 ~x_16 ~x_18 ~x_20 ~a_0 p_4 ~q_1_3 ~x_19 ~q_3_3 ~x_2 ~x_7 ~q_0_1 ~x_11 q_3_2 ~p_2 ~x_5 ~q_0_3 ~p_3 ~x_14 q_3_1 ~x_3 ~p_0 ~p_7 ~p_1 ~b_3 b_2</code></pre>
+    <p>
+    <b>Attention,</b> il y a plusieurs solutions (la factorisation n'est pas
+    unique) et vous n'obtiendrez pas forcément le même résultat. Vous devrez
+    donc extraire les variables <span class="monospace">a_i</span> et <span class="monospace">b_j</span> de la solution pour retrouver les valeurs de
+    <i>a</i> et <i>b</i>
+    </p>
+  </li>
+  <li>
+    <p>
+    Vérifiez que pour les clauses correspondant à un nombre premier ne sont
+    pas satisfiable.
+    </p>
+    <p>
+    <i>Documentez (dans le fichier <span class="monospace">README</span>) et
+    corrigez les bugs éventuels que vous trouvez.</i>
+    </p>
+  </li>
+</ol>
+</div>
+<div class="question">
+<ol>
+  <li>
+    <p>
+    À partir que quelles valeurs de <span class="monospace">n1</span> et
+    <span class="monospace">n2</span> est-ce que la <span class="monospace">naivesat-NOM.py</span> devient trop lent (résultat en 30
+    secondes environ) ?
+    </p>
+    <p>
+    À combien de variables / clauses est-ce que cela correspond ?
+    </p>
+  </li>
+  <li>
+    <p>
+    Testez les mêmes fichiers avec le programme <span class="monospace">minisat</span> (paquet Ubuntu / Debian <span class="monospace">minisat</span>), un SAT solveur très optimisé écrit en
+    C++. À partir de quelles valeurs de <span class="monospace">n1</span> et
+    <span class="monospace">n2</span> est-ce que <span class="monospace">minisat</span> devient trop lent ?
+    </p>
+<div class="remarque">
+    <p>
+    <span class="monospace">minisat</span> lit la formule dans un fichier au
+    format DIMACS. <span class="monospace">naivesat-NOM.py</span> peut
+    sauvegarder une formule au format DIMACS avec l'option <span class="monospace">-O</span> / <span class="monospace">--output</span>:
+    </p>
+<pre><code class="shell">$ ./multiplication.py 10 10 179 | ./naivesat-NOM.py -O "" formule.cnf
+$ minisat formule.cnf</code></pre>
+    <p>
+    Pour les experts du shell, vous pouvez même utiliser les "substitutions
+    de processus" pour éviter d'avoir passer par un fichier :
+    </p>
+<pre><code class="shell">$ minisat &lt;(./multiplication.py 10 10 179 | ./naivesat-NOM.py -O)</code></pre>
+    <p>
+    Pour obtenir la solution trouvée, il faut fournir un second nom de
+    fichier à <span class="monospace">minisat</span> pour qu'il y écrive le
+    résultat :
+    </p>
+<pre><code class="shell">$ ./multiplication.py 10 10 179 | ./naivesat-NOM.py -O "" formule.cnf
+$ minisat formule.cnf formule.sol</code></pre>
+    <p>
+    Pour éviter de passer par un fichier, vous pouvez faire une autre
+    substitution de processus :
+    </p>
+<pre><code class="shell">$ minisat &lt;(./multiplication.py 10 10 179 | ./naivesat-NOM.py -O) &gt;(cat)</code></pre>
+</div>
+  </li>
+</ol>
+</div>
+
+<h1 id="toc_21">3. Optimisation du solveur naïf : algorithme DPLL</h1>
+
+<p>
+La première avancée sur les solveur a été l'<a href="https://fr.wikipedia.org/wiki/Algorithme_DPLL">algorithme DPLL</a>.
+L'idée principale est d'ajouter une phase de <i>simplification</i> avant
+chaque choix du solveur. Cette étape est parfois appelée <i>BCP</i>, pour
+<i>Boolean Constraint Propagation</i>.
+</p>
+<p>
+L'algorithme DPLL proposait 2 simplifications :
+</p>
+<ul>
+  <li>
+    <p>
+    propagation des clauses unitaires,
+    </p>
+  </li>
+  <li>
+    <p>
+    élimination des littéraux purs.
+    </p>
+  </li>
+</ul>
+<p>
+En pratique, seule la première simplification est importante. La seconde
+demande en général trop de calculs...
+</p>
+<p>
+La propagation des clauses unitaires consiste à identifier les clauses avec
+un unique littéral dans la formule :
+</p>
+<div style="text-align: center">
+<i>... ∧ ... ∧ (L) ∧ ... ∧ ...</i>
+</div>
+
+<p>
+Pour satisfaire cette formule, le littéral <i>L</i> doit forcément être à
+vrai. On peut donc l'ajouter à la solution courante et simplifier la formule
+avec la fonction <code>simplify_formula</code> écrite précédemment.
+</p>
+<p>
+<i>Bien entendu, il faut faire cette simplification autant de fois que
+nécessaire.</i>
+</p>
+<div class="question">
+<ol>
+  <li>
+    <p>
+    Ajoutez les quelques lignes suivantes au tout début de la fonction
+    <code>solve</code>, juste après la docstring :
+    </p>
+<!-- Generator: GNU source-highlight 3.1.8
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><code class="language-Python">    <i><span style="color:#9A1900"># boolean constraints propagation</span></i>
+    <b><span style="color:#0000FF">if</span></b> bcp<span style="color:#990000">:</span>
+        F<span style="color:#990000">,</span> sol2 <span style="color:#990000">=</span> <b><span style="color:#000000">BCP</span></b><span style="color:#990000">(</span>F<span style="color:#990000">)</span>
+        sol<span style="color:#990000">.</span><b><span style="color:#000000">extend</span></b><span style="color:#990000">(</span>sol2<span style="color:#990000">)</span>
+</code></pre>
+    <p>
+    Ceci permettra d'appeler automatique la fonction de simplification à
+    chaque étape.
+    </p>
+  </li>
+  <li>
+    <p>
+    Complétez le corps de la fonction <code>BCP(F)</code>. Cette fonction
+    doit renvoyer 2 choses :
+    </p>
+    <ul>
+      <li>
+        <p>
+        la formule simplifié au maximum,
+        </p>
+      </li>
+      <li>
+        <p>
+        la liste des littéraux qui ont servi à cette simplification.
+        </p>
+      </li>
+    </ul>
+    <p>
+    <small>Pour information, le corps de ma fonction fait 12 lignes, en
+    comptant les 2 lignes "<code>sol = []</code>" et "<code>return F,
+    sol</code>".</small>
+    </p>
+  </li>
+  <li>
+    <p>
+    Pour tester, vous pouvez utiliser l'option <span class="monospace">-D</span> / <span class="monospace">--DPLL</span> de
+    <span class="monospace">naivesat-NOM.py</span>.
+    </p>
+    <p>
+    Décrivez les tests que vous effectuez et comparez l'efficacité du solveur
+    optimisé avec le solveur non optimisé.
+    </p>
+  </li>
+  <li>
+    <p>
+    Comparez l'efficacité du solveur naif optimisé avec <span class="monospace">minisat</span> et documentez vos résultats...
+    </p>
+  </li>
+</ol>
+</div>
+<div class="bonus">
+<p>
+Testez d'autres optimisations comme :
+</p>
+<ul>
+  <li>
+    <p>
+    élimination des littéraux purs
+    </p>
+  </li>
+  <li>
+    <p>
+    utilisation du type <span class="monospace">set</span> de Python pour
+    représenter les clauses : une formule sera représentée par une liste
+    d'ensembles
+    </p>
+    <p>
+    (Attention, il faudra modifier certaines fonctions du fichier <span class="monospace">naivesat-NOM.py</span>... Je vous conseille de
+    travailler sur un nouveau fichier <span class="monospace">naivesat-ensembles.py</span> afin de ne pas casser ce
+    que vous avez fait avant !)
+    </p>
+  </li>
+</ul>
+</div>
+
+</div>
+
+<div id="footer">
+
+  <p>
+Remarques sur la page (ou le sujet) : <a href="mailto:pierre.hyvernat@univ-savoie.fr">contact</a>.
+</p>
+<p>
+<a href="https://validator.w3.org/check?uri=referer"><img src="INFO501%20logique%20(et%20informatique)_files/valid-xhtml10-blue.png" alt="valid HTML logo"></a>,
+<a href="https://jigsaw.w3.org/css-validator/check/referer"><img src="INFO501%20logique%20(et%20informatique)_files/vcss-blue.png" alt="valid CSS logo"></a>
+</p>
+<p>
+Dernière révision: le 01-10-2020 à 11:30.
+</p>
+</div>
+
+
+
+
+</body></html>
